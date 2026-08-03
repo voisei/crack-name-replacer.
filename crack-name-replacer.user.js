@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         크랙 캡처용 이름 치환 토글 v2.2
+// @name         크랙 캡처용 이름 치환 토글 v2.3
 // @namespace    crack-name-toggle
-// @version      2.2.0
+// @version      2.3.0
 // @description  크랙 화면의 이름을 실시간 치환하고, 토글 UI를 자유롭게 이동합니다.
 // @match        https://crack.wrtn.ai/*
 // @run-at       document-idle
@@ -543,9 +543,10 @@
                 box-shadow: 0 7px 22px rgba(0, 0, 0, 0.16);
                 color: #4b2338;
                 z-index: 2147483647;
-                cursor: move;
+                cursor: grab;
                 user-select: none;
                 touch-action: none;
+                -webkit-user-select: none;
                 font-family:
                     Arial,
                     "Apple SD Gothic Neo",
@@ -619,10 +620,17 @@
         let pointerId = null;
 
         function start(event) {
+            const interactiveTarget = event.target.closest(
+                'input, textarea, select, button, label'
+            );
+
+            const draggingTheButtonItself =
+                handle === element &&
+                element.id === BUTTON_ID;
+
             if (
-                event.target.closest(
-                    'input, textarea, select, button, label'
-                )
+                interactiveTarget &&
+                !draggingTheButtonItself
             ) {
                 return;
             }
@@ -888,9 +896,11 @@
             panel.classList.add('cnt-hidden');
         });
 
-        button.addEventListener('click', () => {
+        button.addEventListener('click', event => {
             if (suppressButtonClick) {
                 suppressButtonClick = false;
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
 
